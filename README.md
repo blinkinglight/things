@@ -5,3 +5,5 @@ uses 3000, and 4443
 ```
 docker-compose up --build
 ```
+
+open in browser: http://localhost:3000
