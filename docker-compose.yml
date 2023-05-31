@@ -1,0 +1,25 @@
+version: "3.9"  # optional since v1.27.0
+services:
+
+  nats:
+    image: nats:latest
+    command: ["--jetstream", "--config", "/nats/nats.conf", "-DV"]
+    volumes:
+      - nats-data:/nats
+      - ./nats.conf:/nats/nats.conf:ro
+    ports:
+      - 4443:4443
+      # - 4333:4222
+  
+  app:
+    build: .
+    ports:
+      - 3000:3000
+    environment:
+      - NATS_URL=nats://nats:4222
+      - HTTP_ROOT=/
+    depends_on:
+      - nats
+
+volumes:
+  nats-data:
