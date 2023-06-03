@@ -27,7 +27,6 @@ func main() {
 					Subject: s.Subject,
 					Handler: micro.HandlerFunc(func(req micro.Request) {
 						log.Printf("%s got command", s.Name)
-						// var auth Auth
 						message := shared.Message{}
 						err := message.Unmarshal(string(req.Data()))
 						if err != nil {
@@ -71,11 +70,9 @@ func main() {
 				}
 			}
 		}()
-
-		// go s.Fn(ctx)
 	}
 
-	go ws.Run(ctx.Ctx)
+	go ws.Run(ctx)
 
 	select {}
 }

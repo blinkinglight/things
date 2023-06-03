@@ -1,8 +1,6 @@
 package ws
 
 import (
-	"context"
-	"encoding/json"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -14,20 +12,8 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-type Message struct {
-	UserID    string          `json:"userID,omitempty"`
-	SessionID string          `json:"sessionID,omitempty"`
-	Type      string          `json:"type"`
-	Name      string          `json:"name"`
-	ReplyTo   string          `json:"replyTo"`
-	Payload   json.RawMessage `json:"payload"`
-}
-
-func Run(ctx context.Context) {
-	nc, err := shared.NewNATS()
-	if err != nil {
-		panic(err)
-	}
+func Run(ctx shared.Context) {
+	nc := ctx.Nats()
 	_ = nc
 
 	handler := func(w http.ResponseWriter, r *http.Request) {
@@ -61,14 +47,9 @@ func Run(ctx context.Context) {
 			var request shared.Message
 			err := request.Unmarshal(string(b))
 			log.Printf("%v", err)
-			// var payload shared.QueryPayload
-			// payload.Payload = string(b)
-			// payload.Subject = subject
-			// payload.ReplyTo = me
 
-			// data, _ := payload.Marshal()
 			var payload shared.Message
-			// payload.SetMetadata("respond", true)
+
 			payload.SetMetadata("request", request)
 			data, _ := payload.Marshal()
 			msg, err := nc.Conn().Request(subject, []byte(data), 5*time.Second)
