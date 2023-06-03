@@ -3,7 +3,7 @@ package auth
 
 import (
 	"context"
-	"github.com/blinkinglight/thingsbe/shared"
+	"github.com/blinkinglight/things/be/shared"
 	"encoding/json"
 	"log"
 

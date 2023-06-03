@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"log"
 
-	"github.com/blinkinglight/thingsbe/shared"
+	"github.com/blinkinglight/things/be/shared"
 
 	"github.com/nats-io/nats.go/micro"
 )
