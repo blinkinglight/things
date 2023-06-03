@@ -26,17 +26,18 @@
 
       // Subscribe to the "echo" subject and define a message
       // handler that will respond to the requester.
-      // const sub = nc.subscribe("echo");
+      const sub = nc.subscribe("abra");
       const handle = (msg) => {
         console.log(`Received a request: ${sc.decode(msg.data)}`);
-        msg.respond(msg.data);
+        document.getElementById("ws").innerHTML = sc.decode(msg.data);
+        // msg.respond(msg.data);
       }
 
       // Wait to receive messages from the subscription and handle them
       // asynchronously..
-      //(async () => {
-        //for await (const msg of sub) handle(msg)
-      //})();
+      (async () => {
+        for await (const msg of sub) handle(msg)
+      })();
 
       // Now we can send a couple requests to that subject. Note how we
       // are encoding the string data on request and decoding the reply
@@ -51,6 +52,37 @@
       // messages before closing the connection.
       //nc.drain();
       
+      window.login2 = async function() {
+        let payload = {
+          data: {
+            username: document.getElementById("username").value,
+            password: document.getElementById("password").value,
+          }
+        }
+        fetch("http://localhost:3000/pipe?type=command&subject=svc.login&me=abra", {
+            method: "POST",
+            body: JSON.stringify(payload),
+            headers: {
+                "Content-Type": "application/json"
+            }
+        }).then((response) => {
+            console.log(response);
+            return response.json();
+        }).then((data) => {
+            console.log(data);
+            window.session_id = data.session_id;
+            document.getElementById("response").innerHTML = JSON.stringify(data);
+            if(data.success) {
+                document.getElementById("loginform").style.display = "none";
+                document.getElementById("logoutform").style.display = "block";
+            }
+            if(data.message) {
+                document.getElementById("message").innerHTML = data.message;
+            }
+        }).catch((err) => {
+            console.log(err);
+        })
+      }
       
       
       window.send = async function(payload) {
@@ -100,10 +132,14 @@
     <div id="loginform">
         <input type="username" id="username" placeholder="username" />
         <input type="password" id="password" placeholder="password" />
-        <button onclick="login()">send</button>
+        <button onclick="login2()">send</button>
     </div>
     <div id="logoutform" style="display:none">
         <button onclick="logout()">Logout</button>
+    </div>
+
+    <div id="ws">
+
     </div>
   </head>
 </html>

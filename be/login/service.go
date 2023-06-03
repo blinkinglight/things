@@ -1,12 +1,9 @@
 package login
 
 import (
-	"context"
-	"cqrs/be/shared"
-	"encoding/json"
 	"log"
 
-	"github.com/nats-io/nats.go/micro"
+	"github.com/blinkinglight/thingsbe/shared"
 )
 
 type Auth struct {
@@ -20,48 +17,47 @@ type Response struct {
 	Message   string `json:"message,omitempty"`
 }
 
-func Run(ctx context.Context) {
-	// TODO
-	nc, err := shared.NewNATS()
-	if err != nil {
-		panic(err)
-	}
-	_ = nc
-
-	// request handler
-	echoHandler := func(req micro.Request) {
-		log.Printf("svc.login got command")
-		var auth Auth
-		err := json.Unmarshal(req.Data(), &auth)
-		if err != nil {
-			req.Error("503", "Internal error", []byte(err.Error()))
-			return
-		}
-		var resp Response
-		resp.SessionID = "7d652daa88df0c3fef13e23e99ca9e4ce5e31902"
-		resp.Success = 1
-		resp.Message = "logged in"
-		b, _ := json.Marshal(resp)
-		req.Respond(b)
-	}
-
-	srv, err := micro.AddService(nc.Conn(), micro.Config{
+func init() {
+	shared.RegisterService(shared.Service{
+		Subject: "svc.login",
+		Fn:      Run,
 		Name:    "LoginService",
 		Version: "1.0.0",
-		// base handler
-		Endpoint: &micro.EndpointConfig{
-			Subject: "svc.login",
-			Handler: micro.HandlerFunc(echoHandler),
+	})
+}
+
+func Run(ctx shared.Context, message shared.Message) (shared.Message, error) {
+	log.Printf("svc.login got command")
+
+	m, err := ctx.Request("svc.user", shared.Message{
+		Data: map[string]interface{}{
+			"username": "admin",
+			"password": "admin",
+			"@type":    "Auth",
 		},
 	})
-	defer srv.Stop()
-
-	log.Printf("service started: %s", srv.Info().Name)
-
-	for {
-		select {
-		case <-ctx.Done():
-			return
+	if err != nil {
+		return shared.Message{}, &shared.Message{
+			Data: map[string]interface{}{
+				"success": 0,
+				"message": err.Error(),
+				"@type":   "Response",
+			},
 		}
 	}
+
+	log.Printf("%+v", m)
+
+	var msg shared.Message
+	msg.Data = map[string]interface{}{
+		"session_id": "7d652daa88df0c3fef13e23e99ca9e4ce5e31902",
+		"success":    1,
+		"message":    "logged in",
+		"@type":      "Response",
+	}
+	msg.Metadata = map[string]interface{}{
+		"message": m.Data,
+	}
+
+	return msg, nil
 }

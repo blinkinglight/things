@@ -9,17 +9,17 @@ services:
       - ./nats.conf:/nats/nats.conf:ro
     ports:
       - 4443:4443
-      # - 4333:4222
+      - 4333:4222
   
-  app:
-    build: .
-    ports:
-      - 3000:3000
-    environment:
-      - NATS_URL=nats://nats:4222
-      - HTTP_ROOT=/
-    depends_on:
-      - nats
+  # app:
+    # build: .
+    # ports:
+      # - 3000:3000
+    # environment:
+      # - NATS_URL=nats://nats:4222
+      # - HTTP_ROOT=/
+    # depends_on:
+      # - nats
 
 volumes:
   nats-data:

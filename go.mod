@@ -1,4 +1,4 @@
-module cqrs
+module github.com/blinkinglight/things
 
 go 1.20
 
