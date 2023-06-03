@@ -94,7 +94,7 @@ func Run(ctx context.Context) {
 		defer conn.Close()
 
 		// Subscribe to NATS subject and forward messages to WebSocket
-		sub, err := nc.Conn().SubscribeSync("your.nats.subject")
+		sub, err := nc.Conn().SubscribeSync("abra")
 		if err != nil {
 			log.Println("NATS subscription failed:", err)
 			return
@@ -104,7 +104,7 @@ func Run(ctx context.Context) {
 		// Forward messages from NATS to WebSocket
 		go func() {
 			for {
-				msg, err := sub.NextMsg(0)
+				msg, err := sub.NextMsg(time.Hour)
 				if err != nil {
 					log.Println("NATS message subscription failed:", err)
 					return
@@ -126,7 +126,7 @@ func Run(ctx context.Context) {
 				return
 			}
 
-			err = nc.Publish("your.nats.subject", data)
+			err = nc.Publish("abra", data)
 			if err != nil {
 				log.Println("NATS message publish failed:", err)
 				return

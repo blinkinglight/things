@@ -2,8 +2,9 @@ FROM spiksius/go-bash-1.19 AS build
 
 RUN apk update && apk add ca-certificates
 WORKDIR /src
-COPY main.go .
+COPY *.go .
 COPY be be
+COPY shared shared
 COPY go.mod .
 COPY go.sum .
 RUN go mod download
