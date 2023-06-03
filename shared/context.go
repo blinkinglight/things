@@ -7,12 +7,13 @@ import (
 
 type Context struct {
 	Ctx context.Context
+	cfn context.CancelFunc
 	nc  *NATS
 }
 
 func NewContext() (Context, error) {
 	var ctx Context
-	ctx.Ctx = context.Background()
+	ctx.Ctx, ctx.cfn = context.WithCancel(context.Background())
 	var err error
 	ctx.nc, err = NewNATS()
 	if err != nil {
@@ -21,8 +22,16 @@ func NewContext() (Context, error) {
 	return ctx, nil
 }
 
+func (ctx Context) Cancel() {
+	ctx.cfn()
+}
+
 func (ctx Context) Close() {
 	ctx.nc.Close()
+}
+
+func (ctx Context) Wait() {
+	<-ctx.Ctx.Done()
 }
 
 func (ctx Context) Nats() *NATS {

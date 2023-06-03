@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 
+	"github.com/9glt/go-signals"
 	"github.com/blinkinglight/things/be/ws"
 	"github.com/blinkinglight/things/shared"
 
@@ -74,5 +75,12 @@ func main() {
 
 	go ws.Run(ctx)
 
-	select {}
+	go func() {
+		signals.INT(func() {
+			log.Println("got interrupt")
+			ctx.Cancel()
+		})
+	}()
+	ctx.Wait()
+
 }
