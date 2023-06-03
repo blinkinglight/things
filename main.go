@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 
-	"github.com/blinkinglight/things/be/shared"
 	"github.com/blinkinglight/things/be/ws"
+	"github.com/blinkinglight/things/shared"
 
 	"github.com/nats-io/nats.go/micro"
 )

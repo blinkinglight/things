@@ -9,7 +9,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/blinkinglight/things/be/shared"
+	"github.com/blinkinglight/things/shared"
 
 	"github.com/gorilla/websocket"
 )

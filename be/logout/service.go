@@ -1,64 +1,29 @@
 package logout
 
 import (
-	"context"
-	"encoding/json"
 	"log"
 
-	"github.com/blinkinglight/things/be/shared"
-
-	"github.com/nats-io/nats.go/micro"
+	"github.com/blinkinglight/things/shared"
 )
-
-type Auth struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-}
 
 func init() {
 	shared.RegisterService(shared.Service{
 		Subject: "svc.logout",
-		Fn:      RunWithConfig,
+		Fn:      Run,
+		Name:    "LogoutService",
+		Version: "1.0.0",
 	})
 }
 
-func RunWithConfig(ctx context.Context, cfg shared.Config) {
-	// TODO
-	nc, err := shared.NewNATS()
-	if err != nil {
-		panic(err)
-	}
-	_ = nc
+func Run(ctx shared.Context, message shared.Message) (shared.Message, error) {
+	log.Printf("svc.logout got command")
 
-	// request handler
-	logoutHandler := func(req micro.Request) {
-		log.Printf("svc.logout got command")
-		var auth Auth
-		err := json.Unmarshal(req.Data(), &auth)
-		if err != nil {
-			req.Error("503", "Internal error", []byte(err.Error()))
-			return
-		}
-		req.Respond([]byte(`{"success":1, "message": "logged out"}`))
+	var msg shared.Message
+	msg.Data = map[string]interface{}{
+		"success": 1,
+		"message": "logged out",
+		"@type":   "Response",
 	}
 
-	srv, err := micro.AddService(nc.Conn(), micro.Config{
-		Name:    "LogoutService",
-		Version: "1.0.0",
-		// base handler
-		Endpoint: &micro.EndpointConfig{
-			Subject: "svc.logout",
-			Handler: micro.HandlerFunc(logoutHandler),
-		},
-	})
-	defer srv.Stop()
-
-	log.Printf("service started: %s", srv.Info().Name)
-
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		}
-	}
+	return msg, nil
 }

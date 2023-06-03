@@ -3,7 +3,7 @@ package user
 import (
 	"log"
 
-	"github.com/blinkinglight/things/be/shared"
+	"github.com/blinkinglight/things/shared"
 )
 
 type Auth struct {

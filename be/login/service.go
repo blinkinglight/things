@@ -3,19 +3,8 @@ package login
 import (
 	"log"
 
-	"github.com/blinkinglight/things/be/shared"
+	"github.com/blinkinglight/things/shared"
 )
-
-type Auth struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-}
-
-type Response struct {
-	SessionID string `json:"session_id"`
-	Success   int    `json:"success"`
-	Message   string `json:"message,omitempty"`
-}
 
 func init() {
 	shared.RegisterService(shared.Service{
