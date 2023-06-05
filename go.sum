@@ -1,5 +1,7 @@
 github.com/9glt/go-signals v0.0.0-20190721080554-0a592aae3e1b h1:/WDxGFU72t6n90m135+N/ojt4fHM5lvP7sukL+SKNdM=
 github.com/9glt/go-signals v0.0.0-20190721080554-0a592aae3e1b/go.mod h1:855mpK7hHr8SawBcImFnZHdcjs8M0ShA0cHoMSCqsWY=
+github.com/a-h/templ v0.2.282 h1:Jht0ka6XHfa4vyDorTVlS3hBde5C7sVkrDkEH/e2AwI=
+github.com/a-h/templ v0.2.282/go.mod h1:3oc37WS5rpDvFGi6yeknvTKt50xCu67ywQsM43Wr4PU=
 github.com/golang/protobuf v1.5.0/go.mod h1:FsONVRAS9T7sI+LIUmWTfcYkHO4aIWwzhcaSAoJOfIk=
 github.com/golang/protobuf v1.5.3 h1:KhyjKVUg7Usr/dYsdSqoFveMYd5ko72D+zANwlG1mmg=
 github.com/golang/protobuf v1.5.3/go.mod h1:XVQd3VNwM+JqD3oG2Ue2ip4fOMUkwXdXDdiuN0vRsmY=

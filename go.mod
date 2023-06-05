@@ -9,6 +9,7 @@ require (
 
 require (
 	github.com/9glt/go-signals v0.0.0-20190721080554-0a592aae3e1b // indirect
+	github.com/a-h/templ v0.2.282 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/klauspost/compress v1.16.5 // indirect
 	github.com/minio/highwayhash v1.0.2 // indirect

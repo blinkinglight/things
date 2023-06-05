@@ -1,0 +1,75 @@
+package fe2
+
+import "fmt"
+import "time"
+
+templ headerTemplate(name string) {
+	<header data-testid="headerTemplate">
+		<h1>{ name }</h1>
+	</header>
+}
+
+templ footerTemplate() {
+	<footer data-testid="footerTemplate">
+		<div>&copy; { fmt.Sprintf("%d", time.Now().Year()) }</div>
+	</footer>
+}
+
+templ navTemplate() {
+	<nav data-testid="navTemplate">
+		<ul>
+			<li><a href="javascript:;" onclick="call({},'svc.logout')">Logout</a></li>
+			<li><a href="javascript:;" onclick="call({},'svc.posts')">Add / show Posts</a></li>
+		</ul>
+	</nav>
+}
+
+templ layout(name string) {
+			@headerTemplate(name) 
+			@navTemplate() 
+			<main>
+				{ children... }
+			</main>
+			<div id="ws">
+			</div>
+			<div id="html"></div>
+}
+
+script cb(payload , topic string) {
+	console.log(payload);
+	let url = "http://localhost:3000/pipe?type=command&me=abra&subject="+topic;
+	  return fetch(url, {
+          method: "POST",
+          body: JSON.stringify({data: {id : payload}}),
+          headers: {
+              "Content-Type": "application/json"
+          }
+      }).then(res => res.json()).then(res => {
+		  console.log(res);
+	  }).catch(err => {
+		  console.log(err);
+	  });
+}
+
+templ postsTemplate(posts []Post) {
+	<div data-testid="postsTemplate">
+		for _, p := range posts {
+			<div data-testid="postsTemplatePost">
+				<div data-testid="postsTemplatePostName">{ p.Name }</div>
+				<div data-testid="postsTemplatePostAuthor">{ p.Author }</div>
+				<a href="javascript:;" onClick={cb(p.ID  ,"svc.post.delete")}>delete</a>
+			</div>
+		}
+	</div>
+}
+
+templ Home() {
+	@layout("Home") {
+		<div data-testid="homeTemplate">Welcome to my website.</div>
+	}
+}
+
+templ Posts(posts []Post) {
+	<h3>Posts</h3>
+	@postsTemplate(posts)
+}

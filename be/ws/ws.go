@@ -1,6 +1,7 @@
 package ws
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"io/ioutil"
@@ -9,6 +10,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/blinkinglight/things/fe2"
 	"github.com/blinkinglight/things/shared"
 
 	"github.com/gorilla/websocket"
@@ -163,6 +165,19 @@ func Run(ctx shared.Context) {
 			}
 		}
 	}
+
+	http.HandleFunc("/fe", func(w http.ResponseWriter, r *http.Request) {
+
+		var buff bytes.Buffer
+		c := fe2.Posts([]fe2.Post{
+			{
+				Name:   "Test",
+				Author: "autor 1",
+			},
+		})
+		c.Render(context.Background(), &buff)
+		w.Write(buff.Bytes())
+	})
 
 	http.HandleFunc("/pipe", handler)
 	http.HandleFunc("/ws", wshandler)

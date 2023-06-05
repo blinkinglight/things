@@ -1,0 +1,44 @@
+package login
+
+import "fmt"
+import "time"
+
+templ headerTemplate(name string) {
+	<header data-testid="headerTemplate">
+		<h1>{ name }</h1>
+	</header>
+}
+
+templ footerTemplate() {
+	<footer data-testid="footerTemplate">
+		<div>&copy; { fmt.Sprintf("%d", time.Now().Year()) }</div>
+	</footer>
+}
+
+templ navTemplate() {
+	<nav data-testid="navTemplate">
+		<ul>
+			<li><a href="javascript:;" onclick="call({},'svc.logout')">Logout</a></li>
+			<li><a href="javascript:;" onclick="call({},'svc.posts')">Add /show Posts</a></li>
+		</ul>
+	</nav>
+}
+
+templ layout(name string) {
+			@navTemplate() 
+			<main>
+				{ children... }
+			</main>
+			<div id="ws">
+			</div>
+			<div id="html"></div>
+}
+
+templ Home() {
+	@layout("Home") {
+		<div data-testid="homeTemplate">
+			<h1 data-testid="homeTemplateTitle">Home</h1>
+			<p data-testid="homeTemplateText">Welcome to my blog</p>
+		</div>
+	}
+}
