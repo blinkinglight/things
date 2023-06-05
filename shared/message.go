@@ -21,6 +21,17 @@ func (m *Message) Unmarshal(b string) error {
 	return json.Unmarshal([]byte(b), m)
 }
 
+func (m *Message) SetData(key string, value interface{}) {
+	if m.Data == nil {
+		m.Data = make(map[string]interface{})
+	}
+	m.Data[key] = value
+}
+
+func (m *Message) CopyMetadataFrom(msg Message) {
+	m.Metadata = msg.Metadata
+}
+
 func (m *Message) SetMetadata(key string, value interface{}) {
 	if m.Metadata == nil {
 		m.Metadata = make(map[string]interface{})

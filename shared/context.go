@@ -55,3 +55,15 @@ func (ctx Context) Request(subject string, message Message) (Message, error) {
 	}
 	return response, nil
 }
+
+func (ctx Context) Publish(subject string, message Message) error {
+	data, err := message.Marshal()
+	if err != nil {
+		return err
+	}
+	err = ctx.nc.Conn().Publish(subject, []byte(data))
+	if err != nil {
+		return err
+	}
+	return nil
+}

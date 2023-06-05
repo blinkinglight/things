@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "vue-simple-websocket": "^1.0.0"
+  }
+}
