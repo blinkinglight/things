@@ -1,0 +1,34 @@
+package posts
+
+script cb(payload , topic string) {
+	console.log(payload);
+	let url = "http://localhost:3000/pipe?type=command&me=abra&subject="+topic;
+	  return fetch(url, {
+          method: "POST",
+          body: JSON.stringify({data: {id : payload}}),
+          headers: {
+              "Content-Type": "application/json"
+          }
+      }).then(res => res.json()).then(res => {
+		  console.log(res);
+	  }).catch(err => {
+		  console.log(err);
+	  });
+}
+
+templ postsTemplate(posts []Post) {
+	<div data-testid="postsTemplate" id="widgetposts">
+		for _, p := range posts {
+			<div data-testid="postsTemplatePost">
+				<div data-testid="postsTemplatePostName">{ p.Name }</div>
+				<div data-testid="postsTemplatePostAuthor">{ p.Author }</div>
+				<a href="javascript:;" onClick={cb(p.ID  ,"svc.post.delete")}>delete</a>
+			</div>
+		}
+	</div>
+}
+
+templ Widget(posts []Post) {
+	<h3>Posts</h3>
+	@postsTemplate(posts)
+}

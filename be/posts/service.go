@@ -4,10 +4,13 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"log"
 	"math/rand"
 
+	"github.com/a-h/templ"
 	"github.com/blinkinglight/things/fe2"
+	"github.com/blinkinglight/things/fe2/widgets/card"
 	"github.com/blinkinglight/things/shared"
 )
 
@@ -30,6 +33,13 @@ var (
 	posts = []fe2.Post{}
 )
 
+func Unsafe(html string) templ.Component {
+	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
+		_, err = io.WriteString(w, html)
+		return
+	})
+}
+
 func Run(ctx shared.Context, message shared.Message) (shared.Message, error) {
 	log.Printf("svc.posts got command")
 
@@ -43,7 +53,18 @@ func Run(ctx shared.Context, message shared.Message) (shared.Message, error) {
 	})
 
 	fe2.Posts(posts).Render(context.Background(), &buff)
-	msg.SetData("html", buff.String())
+
+	// var tmp bytes.Buffer
+
+	// Unsafe(buff.String()).Render(context.Background(), &tmp)
+
+	var html bytes.Buffer
+	card.Widget(card.Card{
+		Title: "Test",
+		Body:  Unsafe(buff.String()),
+	}).Render(context.Background(), &html)
+
+	msg.SetData("html", html.String())
 	msg.SetData("place", "html")
 
 	return msg, nil
@@ -64,7 +85,13 @@ func RunDelete(ctx shared.Context, message shared.Message) (shared.Message, erro
 	}
 	posts = tmp
 	fe2.Posts(tmp).Render(context.Background(), &buff)
-	msg.SetData("html", buff.String())
+	var html bytes.Buffer
+	card.Widget(card.Card{
+		Title: "Test",
+		Body:  Unsafe(buff.String()),
+	}).Render(context.Background(), &html)
+
+	msg.SetData("html", html.String())
 	msg.SetData("place", "html")
 
 	return msg, nil
