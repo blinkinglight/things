@@ -4,7 +4,9 @@ RUN apk update && apk add ca-certificates
 WORKDIR /src
 COPY *.go .
 COPY be be
+COPY fe2 fe2
 COPY shared shared
+COPY service service
 COPY go.mod .
 COPY go.sum .
 RUN go mod download
