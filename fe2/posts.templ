@@ -24,9 +24,8 @@ templ navTemplate() {
     <ul class="navbar-nav">
       <li class="nav-item">
       </li>
-		<li class="navbar-nav"><a class="nav-link" href="javascript:;" onclick="call({},'svc.logout')">Logout</a></li>
-		<li class="navbar-nav"><a class="nav-link" href="javascript:;" onclick="call({},'svc.posts')">Add / show Posts</a></li>
-	
+		<li class="navbar-nav"><a class="nav-link" href="javascript:;" onclick="call('svc.logout', {}, 'html')">Logout</a></li>
+		<li class="navbar-nav"><a class="nav-link" href="javascript:;" onclick="call('svc.posts', {}, 'html')">Add / show Posts ( 1) </a></li>
     </ul>
 
     <form class="form-inline ml-3">
@@ -128,54 +127,126 @@ templ navTemplate() {
 </nav>
 }
 
-templ layout(name string) {
-			@navTemplate() 
-			<div class="content-wrapper">
-			<div class="content px-2">
-				{ children... }
-				<div id="ws">
-			</div>
-			<div id="html"></div>
-			</div>
-			</div>
-			
+templ sideBar() {
+<aside class="main-sidebar sidebar-dark-primary elevation-4">
+
+  <a href="index3.html" class="brand-link">
+    <img src="dist/img/AdminLTELogo.png" alt="AdminLTE Logo" class="brand-image img-circle elevation-3" style="opacity: .8" />
+    <span class="brand-text font-weight-light">AdminLTE 3</span>
+  </a>
+
+  <div class="sidebar">
+
+    <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+      <div class="image">
+        <img src="dist/img/user2-160x160.jpg" class="img-circle elevation-2" alt="User Image"/>
+      </div>
+      <div class="info">
+        <a href="#" class="d-block">Alexander Pierce</a>
+      </div>
+    </div>
+    <nav class="mt-2">
+      <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu">
+        <li class="nav-item menu-open">
+          <a href="#" class="nav-link active">
+            <i class="nav-icon fas fa-tachometer-alt"></i>
+            <p>
+              Starter Pages
+              <i class="right fas fa-angle-left"></i>
+            </p>
+          </a>
+          <ul class="nav nav-treeview">
+            <li class="nav-item">
+              <a href="#" class="nav-link active">
+                <i class="far fa-circle nav-icon"></i>
+                <p>Active Page</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#" class="nav-link">
+                <i class="far fa-circle nav-icon"></i>
+                <p>Inactive Page</p>
+              </a>
+            </li>
+          </ul>
+        </li>
+        <li class="nav-item">
+          <a href="#" class="nav-link">
+            <i class="nav-icon fas fa-th"></i>
+            <p>
+              Simple Link
+              <span class="right badge badge-danger">New</span>
+            </p>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+  </div>
+
+</aside>
 }
 
-script cb(payload , topic string) {
-	console.log(payload);
-	let url = "http://localhost:3000/pipe?type=command&me=abra&subject="+topic;
-	  return fetch(url, {
-          method: "POST",
-          body: JSON.stringify({data: {id : payload}}),
-          headers: {
-              "Content-Type": "application/json"
-          }
-      }).then(res => res.json()).then(res => {
-		  console.log(res);
-	  }).catch(err => {
-		  console.log(err);
-	  });
+templ layout(name string) {
+			@navTemplate() 
+			@sideBar()
+			<div class="content-wrapper">
+			<div class="content mt-2">
+				{ children... }
+				<div id="ws">
+        </div>
+        <div class="row">
+          <div class="col-md-4">
+            <div id="html">
+
+            </div>
+          </div>
+        </div>
+			</div>
+      </div>
+
+       <script>
+        call("svc.post.render", {}, "html");
+      </script>
 }
 
 templ postsTemplate(posts []Post) {
-	<div data-testid="postsTemplate">
+	<table class="table">
 		for _, p := range posts {
-			<div data-testid="postsTemplatePost">
-				<div data-testid="postsTemplatePostName">{ p.Name }</div>
-				<div data-testid="postsTemplatePostAuthor">{ p.Author }</div>
-				<a href="javascript:;" onClick={cb(p.ID  ,"svc.post.delete")}>delete</a>
-			</div>
+			<tr>
+				<td>{ p.Name }</td>
+				<td>{ p.Author }</td>
+				
+        <td><a href="#" class="x-item" data-id={ p.ID } data-function="svc.post.edit" data-target="html">X edit</a></td>
+        <td><a href="#" class="x-item" data-id={ p.ID } data-function="svc.post.delete" data-target="html">X delete</a></td>
+			</tr>
 		}
-	</div>
+    if len(posts) == 0 {
+      <tr>
+        <td colspan="4">No posts</td>
+      </tr>
+    }
+	</table>
+}
+
+
+templ editTemplate(post Post, form Form, paylaod string) {
+  <form id="form" class="x-form" data-function={ form.Command } data-target={ form.Target } data-id={ form.ID } data-payload={ paylaod }>
+      <input type="text" name="name" value={ post.Name } />
+      <input type="text" name="author" value={ post.Author } />
+      <input type="submit" value="Submit" />
+    </form>
+}
+
+templ Edit(post Post, form Form, payload string) {
+  @editTemplate(post, form, payload)
 }
 
 templ Home() {
 	@layout("Homezzzz") {
-		
 	}
 }
 
 templ Posts(posts []Post) {
-	<h3>Posts</h3>
 	@postsTemplate(posts)
 }

@@ -1,27 +1,13 @@
 package card
 
-script cb(payload , topic string) {
-	console.log(payload);
-	let url = "http://localhost:3000/pipe?type=command&me=abra&subject="+topic;
-	  return fetch(url, {
-          method: "POST",
-          body: JSON.stringify({data: {id : payload}}),
-          headers: {
-              "Content-Type": "application/json"
-          }
-      }).then(res => res.json()).then(res => {
-		  console.log(res);
-	  }).catch(err => {
-		  console.log(err);
-	  });
-}
-
 templ cardTemplate(card Card) {
 <div class="card">
   <div class="card-header">
     <h3 class="card-title">{ card.Title }</h3>
     <div class="card-tools">
-      <span class="badge badge-primary">Label</span>
+      <span class="badge badge-primary">
+        {! card.Badge }
+      </span>
     </div>
   </div>
   <div class="card-body">

@@ -9,23 +9,12 @@ import "context"
 import "io"
 import "bytes"
 
-func cb(payload , topic string) templ.ComponentScript {
+func cb(payload , topic, me string) templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_cb_9232`,
-		Function: `function __templ_cb_9232(payload, topic){console.log(payload);
-	let url = "http://localhost:3000/pipe?type=command&me=abra&subject="+topic;
-	  return fetch(url, {
-          method: "POST",
-          body: JSON.stringify({data: {id : payload}}),
-          headers: {
-              "Content-Type": "application/json"
-          }
-      }).then(res => res.json()).then(res => {
-		  console.log(res);
-	  }).catch(err => {
-		  console.log(err);
-	  });}`,
-		Call: templ.SafeScript(`__templ_cb_9232`, payload, topic),
+		Name: `__templ_cb_5ced`,
+		Function: `function __templ_cb_5ced(payload, topic, me){console.log(payload);
+  call(topic, {data: { id : payload }}, me);}`,
+		Call: templ.SafeScript(`__templ_cb_5ced`, payload, topic, me),
 	}
 }
 
@@ -126,7 +115,7 @@ func postsTemplate(posts []Post) templ.Component {
 			}
 			// Element (standard)
 			// Element Script
-			err = templ.RenderScriptItems(ctx, templBuffer, cb(p.ID  ,"svc.post.delete"))
+			err = templ.RenderScriptItems(ctx, templBuffer, cb(p.ID  ,"svc.post.delete", "widgetposts"))
 			if err != nil {
 				return err
 			}
@@ -147,7 +136,7 @@ func postsTemplate(posts []Post) templ.Component {
 			if err != nil {
 				return err
 			}
-			var var_4 templ.ComponentScript = cb(p.ID  ,"svc.post.delete")
+			var var_4 templ.ComponentScript = cb(p.ID  ,"svc.post.delete", "widgetposts")
 			_, err = templBuffer.WriteString(var_4.Call)
 			if err != nil {
 				return err

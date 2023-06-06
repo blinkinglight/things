@@ -1,0 +1,9 @@
+package card
+
+script cbd(payload , topic, me string) {
+	// console.log(topic, {data: { id : payload }}, me);
+  call(topic, {data: { id : payload }}, me);
+}
+templ Badge() {
+    <a href="#" class="x-item" data-id="" data-target="html" data-function="svc.post.edit"> Edit</a>
+}

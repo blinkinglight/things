@@ -9,6 +9,7 @@ type Context struct {
 	Ctx context.Context
 	cfn context.CancelFunc
 	nc  *NATS
+	msg Message
 }
 
 func NewContext() (Context, error) {
@@ -20,6 +21,17 @@ func NewContext() (Context, error) {
 		return ctx, err
 	}
 	return ctx, nil
+}
+
+func (ctx Context) Clone() Context {
+	var clone Context
+	clone.Ctx = ctx.Ctx
+	clone.nc = ctx.nc
+	return clone
+}
+
+func (ctx Context) SetMessage(msg Message) {
+	ctx.msg = msg
 }
 
 func (ctx Context) Cancel() {
@@ -41,6 +53,7 @@ func (ctx Context) Nats() *NATS {
 func (ctx Context) Request(subject string, message Message) (Message, error) {
 	var response Message
 	message.SetMetadata("internal", "true")
+	message.CopyContextFrom(ctx.msg)
 	data, err := message.Marshal()
 	if err != nil {
 		return response, err

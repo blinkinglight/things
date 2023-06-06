@@ -12,17 +12,20 @@ import (
 
 func main() {
 
-	ctx, err := shared.NewContext()
-	if err != nil {
-		panic(err)
-	}
-
 	for _, s := range shared.Registry {
 		s := s
 		go func() {
+			ctx, err := shared.NewContext()
+			if err != nil {
+				panic(err)
+			}
 			srv, _ := service.AddService(ctx, s)
 			log.Printf("service started: %s", srv.Info().Name)
 		}()
+	}
+	ctx, err := shared.NewContext()
+	if err != nil {
+		panic(err)
 	}
 
 	go ws.Run(ctx)

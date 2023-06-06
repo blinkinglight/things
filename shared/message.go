@@ -2,9 +2,69 @@ package shared
 
 import "encoding/json"
 
+type Structure map[string]interface{}
+
+func (s Structure) Set(key string, value interface{}) {
+	s[key] = value
+}
+
+func (s Structure) Get(key string) (interface{}, bool) {
+	value, ok := s[key]
+	if ok {
+		return value, ok
+	}
+	return nil, ok
+}
+
+func (s Structure) GetStructure(key string) (Structure, bool) {
+	value, ok := s[key]
+	if !ok {
+		return nil, ok
+	}
+	st := Structure{}
+	for k, v := range value.(map[string]interface{}) {
+		(st)[k] = v
+	}
+	return st, ok
+}
+
+func (s Structure) GetString(key string) (string, bool) {
+	value, ok := s[key]
+	switch value.(type) {
+	case string:
+		return value.(string), ok
+	default:
+		return "", ok
+	}
+}
+
 type Message struct {
-	Data     map[string]interface{} `json:"data"`
-	Metadata map[string]interface{} `json:"metadata"`
+	Data     Structure `json:"data"`
+	Metadata Structure `json:"metadata"`
+}
+
+func (m *Message) Context() Structure {
+	value, ok := m.Metadata.Get("context")
+	if !ok {
+		return nil
+	}
+	return value.(Structure)
+}
+
+func (m *Message) CopyContextFrom(msg Message) {
+	context := msg.Context()
+	if context != nil {
+		m.Metadata.Set("context", context)
+	}
+}
+
+func (m *Message) Request(key string) (string, bool) {
+	value, ok := m.Metadata.GetStructure("request")
+	if !ok {
+		return "", ok
+	}
+	v, ok := value.GetString(key)
+	return v, ok
 }
 
 func (m *Message) Error() string {

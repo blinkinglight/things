@@ -64,12 +64,13 @@ func Run(ctx shared.Context) {
 			log.Printf("aaa %s %v", string(b), subject)
 			var request shared.Message
 			err = request.Unmarshal(string(b))
-			log.Printf("vvv %v %v", err, request)
+			log.Printf("vvv %v %+v", err, request)
 
 			var payload shared.Message
 			payload.SetMetadata("respond", false)
 			payload.SetMetadata("request", request.Data)
 			payload.SetMetadata("reply_to", "abra")
+			payload.SetMetadata("place", request.GetMetadata("place"))
 			data, _ := payload.Marshal()
 			if blocking == "1" {
 				msg, err := nc.Conn().Request(subject, []byte(data), 5*time.Second)
@@ -81,6 +82,7 @@ func Run(ctx shared.Context) {
 				w.Write(msg.Data)
 				return
 			}
+			log.Printf("topic: %v", subject)
 			err = nc.Conn().Publish(subject, []byte(data))
 			if err != nil {
 				log.Printf("error: %v", err)
@@ -139,6 +141,7 @@ func Run(ctx shared.Context) {
 				msg, err := sub.NextMsg(time.Hour)
 				if err != nil {
 					log.Println("NATS message subscription failed:", err)
+					conn.Close()
 					return
 				}
 

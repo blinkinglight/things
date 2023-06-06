@@ -9,26 +9,6 @@ import "context"
 import "io"
 import "bytes"
 
-func cb(payload , topic string) templ.ComponentScript {
-	return templ.ComponentScript{
-		Name: `__templ_cb_9232`,
-		Function: `function __templ_cb_9232(payload, topic){console.log(payload);
-	let url = "http://localhost:3000/pipe?type=command&me=abra&subject="+topic;
-	  return fetch(url, {
-          method: "POST",
-          body: JSON.stringify({data: {id : payload}}),
-          headers: {
-              "Content-Type": "application/json"
-          }
-      }).then(res => res.json()).then(res => {
-		  console.log(res);
-	  }).catch(err => {
-		  console.log(err);
-	  });}`,
-		Call: templ.SafeScript(`__templ_cb_9232`, payload, topic),
-	}
-}
-
 func cardTemplate(card Card) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
 		templBuffer, templIsBuffer := w.(*bytes.Buffer)
@@ -122,9 +102,8 @@ func cardTemplate(card Card) templ.Component {
 		if err != nil {
 			return err
 		}
-		// Text
-		var_3 := `Label`
-		_, err = templBuffer.WriteString(var_3)
+		// CallTemplate
+		err = card.Badge.Render(ctx, templBuffer)
 		if err != nil {
 			return err
 		}
@@ -182,9 +161,9 @@ func Widget(card Card) templ.Component {
 			defer templ.ReleaseBuffer(templBuffer)
 		}
 		ctx = templ.InitializeContext(ctx)
-		var_4 := templ.GetChildren(ctx)
-		if var_4 == nil {
-			var_4 = templ.NopComponent
+		var_3 := templ.GetChildren(ctx)
+		if var_3 == nil {
+			var_3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 		// TemplElement

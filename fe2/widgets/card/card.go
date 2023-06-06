@@ -5,4 +5,5 @@ import "github.com/a-h/templ"
 type Card struct {
 	Title string          `json:"title"`
 	Body  templ.Component `json:"body"`
+	Badge templ.Component `json:"body"`
 }

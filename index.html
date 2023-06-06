@@ -2,10 +2,75 @@
 <html>
 
 <head>
+  <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.1/dist/js/adminlte.min.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.1/dist/css/adminlte.min.css">
 
+  <script>
+
+    $.fn.serializeObject = function() {
+      var o = {};
+      var a = this.serializeArray();
+      $.each(a, function() {
+          if (o[this.name]) {
+              if (!o[this.name].push) {
+                  o[this.name] = [o[this.name]];
+              }
+              o[this.name].push(this.value || '');
+          } else {
+              o[this.name] = this.value || '';
+          }
+      });
+      return o;
+  };
+
+    $(document).ready(function() {
+
+      $("body").on("click", ".x-item", function() {
+        let id = $(this).attr("data-id");
+        let cmd = $(this).attr("data-function");
+        let target = $(this).attr("data-target");
+        let pl = $(this).attr("data-payload") ?? "{}";
+        let payload = {
+        data: {
+          id: id,
+          ...JSON.parse(pl)
+        },
+        metadata: {
+          place: target 
+        }
+      }
+      call(cmd, payload, target);
+    });
+
+    $("body").on("submit", ".x-form", function() {
+      let id = $(this).attr("data-id");
+      let cmd = $(this).attr("data-function");
+      let target = $(this).attr("data-target");
+      let pl = $(this).attr("data-payload") ?? "{}";
+      let payload = {
+        data: {
+          id: id,
+          ...$(this).serializeObject(),
+          ...JSON.parse(pl)
+        },
+        metadata: {
+          place: target 
+        }
+      }
+      call(cmd, payload, target);
+      return false;
+    })
+  });
+
+  </script>
+
+
   <script defer type="module">
+
+    let cache = {};
+function wsconnect() {
+
 
     let ws = new WebSocket("ws://localhost:3000/ws");
       ws.onopen = function() {
@@ -13,7 +78,7 @@
         // ws.send("hello");
       }
       ws.onmessage = function(e) {
-        console.log("message", e.data);
+        // console.log("message", e.data);
         // document.getElementById("ws").innerHTML = e.data;
 
         let json = JSON.parse(e.data);
@@ -35,13 +100,47 @@
           }
         }
         if(json.data?.html) {
-          if(json.data.place) {
-            document.getElementById(json.data.place).innerHTML = json.data.html;
-            let scr = document.getElementById(json.data.place).getElementsByTagName("script");
-            for(let i in scr) {
+          let place = json.data?.place;
+          if(json.metadata?.place) {
+            place = json.metadata?.place; 
+          }
+          if(place == null) {
+            place = "app";
+          }
+          $("#"+place).html(json.data.html);
+          return;
+          // console.log("place message: ", place);
+            document.getElementById(place).innerHTML = json.data.html;
+             let scr = document.getElementById(place).getElementsByTagName("script");
+            //let scr2 = (document.getElementById(place).getElementsByTagName("script"));
+            let els  = [];
+            for (let i in scr) {
+              // console.log(scr[i], typeof scr[i])
+              if(typeof scr[i] == "object") {
+                console.log("script");
+                els.push(scr[i]);
+              }
+            }
+            
+            //for (let i in scr) {
+            //  els.push(scr[i]);
+            //}
+            // console.log(cache[scr]);
+            
+            for(let i in els) {
               try {
+                // console.log(els[i], typeof cache[els[i]]);
+                if(typeof cache[els[i].innerText] === "undefined") {
+                  cache[els[i].innerText] = 1;
+                  console.log("Adding js", els[i].innerText);
+                  // console.log("not cached");
+                } else {
+                  // console.log("cached");
+                 continue;
+                }
+                let sc  = els[i].innerHTML.replace(/<script>(.*)<\/script>/, "$1");
 
-                let sc  = scr[i].innerHTML.replace(/<script>(.*)<\/script>/, "$1");
+                  eval(sc);
                   document.head.appendChild(document.createElement("script")).innerHTML = sc;
                 }
                 catch(e) {
@@ -50,18 +149,28 @@
               //console.log(sc, eval(sc));
             }
           }
-           else {
-            console.log(document.getElementsByTagName("script").innerHTML);
-             document.getElementById("app").innerHTML = json.data.html;
-            }
-        }
+          // else {
+          //  console.log(document.getElementsByTagName("script").innerHTML);
+          //   document.getElementById("app").innerHTML = json.data.html;
+          //  }
+          //  let scripts = document.body.getElementsByTagName("script");
+          //  for ( let i in scripts) {
+          //    //document.head.appendChild(document.createElement("script")).innerHTML = scripts[i].innerHTML;
+          //  //console.log(eval(scripts[i]));
+          //  }
+      
       }
       ws.onclose = function() {
         console.log("close");
+        setTimeout(function() {
+          wsconnect();
+        }, 1000);
       }
       ws.onerror = function() {
         console.log("error");
       }
+    }
+    wsconnect();
 
       window.alive = async function () {
         let payload = {
@@ -69,11 +178,22 @@
             session_id: window.session_id
           }
         }
-        ping(payload, "svc.alive");
+        // ping(payload, "svc.alive");
+        call("svc.alive", payload, "app");
       }
 
+      window.call = async function(fn, payload, placeTo) {
+        let data = {
+          ...payload,
+          metadata: {
+            place: placeTo
+          }
+        }
+        ping(data, fn);
+      }
 
       window.ping = async function(payload, fn) {
+        // console.log("ping", payload, fn);
         return fetch(`http://localhost:3000/pipe?type=command&subject=${fn}&me=abra`, {
           method: "POST",
           body: JSON.stringify(payload),
@@ -83,7 +203,7 @@
       });
       }
 
-      window.call = window.ping;
+      //window.call = window.ping;
       
       
       window.send = async function(payload) {

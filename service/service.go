@@ -29,16 +29,23 @@ func AddService(ctx shared.Context, s shared.Service) (micro.Service, error) {
 						req.Error("503", "Internal error", []byte(err.Error()))
 						return
 					}
-
-					response, err := s.Fn.Execute(ctx, message)
+					// ctx.SetMessage(message)
+					log.Printf("message: %+v", message)
+					c := ctx.Clone()
+					c.SetMessage(message)
+					response, err := s.Fn.Execute(c, message)
 					if err != nil {
 						req.Error("503", "Internal error", []byte(err.Error()))
-						ctx.Publish("abra", shared.Message{
+						c.Publish("abra", shared.Message{
 							Data: map[string]interface{}{
 								"error": err.Error(),
 							},
 						})
 						return
+					}
+					log.Printf("place here %+v", message.GetMetadata("place"))
+					if message.GetMetadata("place") != nil {
+						response.SetMetadata("place", message.GetMetadata("place"))
 					}
 					responseData, err := response.Marshal()
 					if err != nil {
@@ -53,7 +60,7 @@ func AddService(ctx shared.Context, s shared.Service) (micro.Service, error) {
 					}
 
 					if message.GetMetadata("reply_to") != nil {
-						ctx.Nats().Conn().Publish(message.GetMetadata("reply_to").(string), []byte(responseData))
+						c.Nats().Conn().Publish(message.GetMetadata("reply_to").(string), []byte(responseData))
 					}
 				}),
 			},
